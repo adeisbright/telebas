@@ -16,7 +16,6 @@ export class ChatController {
     @Body(new ZodValidationPipe(createPromptSchema))
     payload: ITelegramWebhookMessage,
   ) {
-    console.log('Webhook Called');
     this.chatService.processPrompt(payload);
     return {
       message: 'Webook message acknowledged',

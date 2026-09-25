@@ -8,4 +8,5 @@ export const configValidationSchema = z.object({
   PAYSTACK_TRANSACTION_URL: z.string().min(1),
   TELEGRAM_BASE_URL: z.string().min(1),
   TELEGRAM_TOKEN: z.string().min(1),
+  TELEGRAM_CHAT_ID: z.string().min(1),
 });

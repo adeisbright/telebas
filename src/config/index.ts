@@ -8,6 +8,7 @@ const config = (): IEnvironmentVariables => ({
   paystackTransactionUrl: process.env.PAYSTACK_TRANSACTION_URL!,
   telegramToken: process.env.TELEGRAM_TOKEN!,
   telegramBaseUrl: process.env.TELEGRAM_BASE_URL!,
+  telegramChatId: process.env.TELEGRAM_CHAT_ID!,
 });
 
 export default config;

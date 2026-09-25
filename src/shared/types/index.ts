@@ -17,6 +17,7 @@ export interface IEnvironmentVariables {
   paystackTransactionUrl: string;
   telegramToken: string;
   telegramBaseUrl: string;
+  telegramChatId: string;
 }
 
 export interface IFootballCompetition {

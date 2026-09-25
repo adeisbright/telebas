@@ -26,7 +26,7 @@ export class AssistantService {
     this.aiModel = this.configService.get<string>('geminiModel');
   }
 
-  private listPaystackPlanTool() {
+  private listPlans() {
     return {
       type: 'function',
       description: 'List Plans on Paystack',
@@ -34,11 +34,11 @@ export class AssistantService {
     } as const;
   }
 
-  private getPlanInfo() {
+  private getPlan() {
     return {
       type: 'function',
       description: 'List Plans on Paystack',
-      name: 'fetchPlan',
+      name: 'getPlan',
       parameters: {
         type: 'object',
         properties: {
@@ -52,6 +52,14 @@ export class AssistantService {
     } as const;
   }
 
+  /**
+   * TODO
+   * 1. Store Webhook Messages from Telegram to avoid duplicate
+   * 2. Reject or Don't Process Acknowledged Webhook
+   * 3. Log Every Request for Observability Purpose
+   * 4. Log Every Prompt , The Response and Setup a Way to Evaluate
+   *
+   */
   async subscriptionAdvisor(payload: ITelegramWebhookMessage) {
     const {
       message: { chat, text: prompt },
@@ -60,9 +68,13 @@ export class AssistantService {
     try {
       this.logger.log('Responding to Message from Telegram');
       //Setup Prompt Controls and Message Response Target
-      const systemInstructions = `Do Not Process Any prompt that is not related to paystack subscriptions.
-    For any of such prompt. Respond with : Please, contact support`;
-      const functionCalls = [this.listPaystackPlanTool(), this.getPlanInfo()];
+      const systemInstructions = `
+      Do Not Process Any prompt that is 
+      not related to paystack subscriptions.
+      For any of such prompt. Respond with: 
+      Please, contact support
+      `;
+      const functionCalls = [this.listPlans(), this.getPlan()];
 
       this.logger.log('Interacting with Gemini for', prompt);
       //Interact with Gemini
@@ -90,7 +102,7 @@ export class AssistantService {
         this.logger.log(`Function execution result: ${JSON.stringify(result)}`);
       }
 
-      if (fcStep.name === 'fetchPlan') {
+      if (fcStep.name === 'getPlan') {
         result = await this.paystackService.fetchPlanData(
           fcStep.arguments.planCode,
         );
@@ -128,7 +140,10 @@ export class AssistantService {
         chatId,
       );
     } catch (err) {
-      this.logger.error(err);
+      this.logger.error(
+        'Failed to process subscription request',
+        err instanceof Error ? err.stack : String(err),
+      );
       this.telegramService.messageTelegram(
         'Sorry, we encountered an error',
         chatId,
